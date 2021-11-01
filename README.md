@@ -2,9 +2,9 @@
 
 # p2p betting platform
 
-Frontend: Vue
-Ethereum Development Environment: Hardhat
-Ethereum Web Client Library: Ether.js
+* Frontend: Vue
+* Ethereum Development Environment: Hardhat
+* Ethereum Web Client Library: Ether.js
 
 # To run locally
 
