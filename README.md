@@ -1,24 +1,19 @@
 # p2p
 
-## Project setup
-```
-yarn install
-```
+# p2p betting platform
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+Frontend: Vue
+Ethereum Development Environment: Hardhat
+Ethereum Web Client Library: Ether.js
 
-### Compiles and minifies for production
-```
-yarn build
-```
+# To run locally
 
-### Lints and fixes files
-```
-yarn lint
-```
+1. yarn install
+2. yarn serve
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+In another terminal
+
+1. yarn hardhat node
+2. Add one of the private keys to your meta mask 
+
+Open MetaMask to localhost:8080 and connect the test account (should have 10000 ETH)
