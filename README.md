@@ -17,3 +17,7 @@ In another terminal
 2. Add one of the private keys to your meta mask 
 
 Open MetaMask to localhost:8080 and connect the test account (should have 10000 ETH)
+
+# To run tests
+
+1. yarn hardhat test
