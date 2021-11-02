@@ -1,15 +1,17 @@
 <template>
-  <h1 style="color: red" v-if="!hasMetaMask">
+  <h1 style="color: red" v-if="!connectedToEthereum">
     You need MetaMask to use this application
   </h1>
   <h1>Jack's First P2P Blockchain Betting Application</h1>
   <img width="100" src="./assets/coin.svg" />
+  <h3>Your address: {{ address }}</h3>
   <p>Make a bet</p>
   <p>
     <input type="text" v-model="bet" />
     <label>ETH</label>
     <button @click="makeBet">Bet</button>
   </p>
+  <p v-if="betError" style="color: red">{{ betError }}</p>
   <h3>Current Bets</h3>
   <table>
     <thead>
@@ -17,7 +19,6 @@
         <th>Address</th>
         <th>Side</th>
         <th>Wage</th>
-        <th>Time Remaining</th>
         <th>Result</th>
         <th>Accept?</th>
       </tr>
@@ -28,7 +29,7 @@
         <td>{{ bet.side }}</td>
         <td>{{ bet.wage }}</td>
         <td>{{ bet.result }}</td>
-        <td><button>Accept</button></td>
+        <td><button :disabled="(bet.address = address)">Accept</button></td>
       </tr>
     </tbody>
   </table>
@@ -41,51 +42,56 @@ import { ethers } from "ethers";
 export default {
   name: "App",
   setup() {
-    const hasMetaMask = ref(false);
+    const connectedToEthereum = ref(false);
 
     const bet = ref(0);
+    const betError = ref("");
     const bets = ref([]);
 
+    const address = ref("");
+
     const makeBet = () => {
-      if (!hasMetaMask.value) {
+      if (!connectedToEthereum.value) {
         return;
       }
+      if (bet.value <= 0) {
+        betError.value = "You cannot bet 0 ETH";
+        return;
+      }
+      betError.value = "";
       const newBet = {
-        address: "0x1234567890123456789012345678901234567890",
+        address: address.value,
         side: "Heads",
         wage: bet.value,
         result: "Pending",
         accepted: false,
       };
       bets.value.push(newBet);
+      bet.value = 0;
     };
 
     onMounted(async () => {
       if (!window.ethereum) {
-        hasMetaMask.value = false;
+        connectedToEthereum.value = false;
         return;
       }
-      window.ethereum.enable();
-      hasMetaMask.value = true;
+      try {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        connectedToEthereum.value = true;
+      } catch (error) {
+        connectedToEthereum.value = false;
+      }
       const provider = new ethers.providers.Web3Provider(window.ethereum);
-      console.log(provider);
       const signer = provider.getSigner();
-      console.log(signer);
-      const currentBlockNumber = await provider.getBlockNumber();
-      console.log("Current Block Number", currentBlockNumber);
-      // get current address of meta mask user
-      signer.getAddress().then((address) => {
-        console.log("Current Address", address);
-      });
-      const address = await signer.getAddress();
-      const balance = await provider.getBalance(address);
-      console.log(ethers.utils.formatEther(balance));
+      address.value = await signer.getAddress();
     });
     return {
       bet,
+      betError,
       bets,
       makeBet,
-      hasMetaMask,
+      connectedToEthereum,
+      address,
     };
   },
 };
