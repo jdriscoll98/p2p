@@ -21,7 +21,6 @@ describe("Game", async () => {
     const bet = await contractFactory.deploy(game.address, {
       value: ethers.utils.parseEther("1"),
     });
-    await game.addBet(bet.address);
     const bets = await game.getBets();
     expect(bets[0]).to.equal(bet.address);
   });

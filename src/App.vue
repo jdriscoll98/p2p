@@ -20,14 +20,32 @@
     </p>
 
     <h3>Current Games</h3>
-    <template :key="game" v-for="game in games"> {{ game }} <br /> </template>
+    <table :key="game.address" v-for="game in games">
+      <thead>
+        <tr>
+          <th colspan="100%">Address: {{ game.address }}</th>
+        </tr>
+        <tr>
+          <th>
+            Current Bets <button @click="newBet(game.address)">New Bet</button>
+          </th>
+          <th>Wager</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr :key="bet" v-for="bet in game.bets">
+          <td>{{ bet }}</td>
+          <td>1 ETH</td>
+        </tr>
+      </tbody>
+    </table>
   </template>
 </template>
 
 <script>
 import { onMounted, ref, watch } from "vue";
 import { ethers } from "ethers";
-// import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
+import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
 import Game from "../artifacts/contracts/Game.sol/Game.json";
 import Platform from "../artifacts/contracts/Platform.sol/Platform.json";
 
@@ -55,8 +73,40 @@ export default {
         provider
       );
 
-      games.value = await contract.getGames();
+      const gameAddresses = await contract.getGames();
+      const promises = await gameAddresses.map(async (address) => {
+        const game = new ethers.Contract(address, Game.abi, provider);
+        const bets = await game.getBets();
+        return {
+          address: address,
+          bets: bets,
+        };
+      });
+      games.value = await Promise.all(promises);
     });
+
+    const getBets = async (gameAddress) => {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const contract = new ethers.Contract(gameAddress, Game.abi, provider);
+
+      const bets = await contract.getBets();
+      console.log(bets);
+      return bets;
+    };
+
+    const newBet = async (gameAddress) => {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
+      const betFactory = new ethers.ContractFactory(
+        Bet.abi,
+        Bet.bytecode,
+        signer
+      );
+      await betFactory.deploy(gameAddress, {
+        value: ethers.utils.parseEther("1"),
+      });
+    };
 
     const createGame = async () => {
       if (!currentPlatform.value) {
@@ -76,14 +126,21 @@ export default {
       const contract = new ethers.Contract(
         currentPlatform.value,
         Platform.abi,
-        signer
+        provider
       );
       // get the games from the platform
-      games.value = await contract.getGames();
+
+      const gameAddresses = await contract.getGames();
+      const promises = await gameAddresses.map(async (address) => {
+        const game = new ethers.Contract(address, Game.abi, provider);
+        const bets = await game.getBets();
+        return {
+          address: address,
+          bets: bets,
+        };
+      });
+      games.value = await Promise.all(promises);
     };
-    const bet = ref(0);
-    const betError = ref("");
-    const bets = ref([]);
 
     const address = ref("");
 
@@ -138,10 +195,6 @@ export default {
 
     return {
       connectedToEthereum,
-
-      bet,
-      betError,
-      bets,
       address,
 
       platformAddress,
@@ -152,6 +205,9 @@ export default {
 
       games,
       createGame,
+
+      getBets,
+      newBet,
     };
   },
 };
