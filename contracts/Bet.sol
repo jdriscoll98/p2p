@@ -2,19 +2,23 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
+import "./Game.sol";
 
 contract Bet {
     // create a variable to store two addresses
+    Game public game;
     address payable public player1;
     address payable public player2;
 
     // create a variable to store the bet amount
     uint256 public betAmount;
 
-    constructor() payable {
+    constructor(address gameAddress) payable {
         player1 = payable(msg.sender);
+        game = Game(gameAddress);
         // set the bet amount to the value of the message
         betAmount = msg.value;
+        game.addBet(address(this)); // TODO: Working on only needing one contract call per bet
     }
 
     function acceptBet() public payable {

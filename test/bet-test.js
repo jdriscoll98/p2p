@@ -1,10 +1,19 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("Bet", function () {
+describe("Bet", async () => {
+  let game;
+
+  before(async () => {
+    const platformFactory = await ethers.getContractFactory("Platform");
+    const platform = await platformFactory.deploy();
+    const factory = await ethers.getContractFactory("Game");
+    game = await factory.deploy(platform.address);
+  });
+
   it("Should deploy a new Bet contract", async function () {
     const Bet = await ethers.getContractFactory("Bet");
-    const contract = await Bet.deploy();
+    const contract = await Bet.deploy(game.address);
     await contract.deployed();
     // check that contract is deployed
     expect(contract.address).to.be.a("string");
@@ -12,7 +21,7 @@ describe("Bet", function () {
 
   it("should set player1 equal to sender address", async function () {
     const Bet = await ethers.getContractFactory("Bet");
-    const contract = await Bet.deploy();
+    const contract = await Bet.deploy(game.address);
     await contract.deployed();
     const player1 = await contract.player1();
     // player 1 should equal first account address
@@ -22,7 +31,7 @@ describe("Bet", function () {
 
   it("should set the bet amount to be 0 ", async () => {
     const Bet = await ethers.getContractFactory("Bet");
-    const contract = await Bet.deploy();
+    const contract = await Bet.deploy(game.address);
     await contract.deployed();
     const betAmount = await contract.betAmount();
     // bet amount should equal the value sent, 0 in this case.
@@ -31,9 +40,13 @@ describe("Bet", function () {
 
   it("should set the bet amount to be 1 ETH ", async () => {
     const Bet = await ethers.getContractFactory("Bet");
-    const contract = await Bet.deploy({
-      value: ethers.utils.parseEther("1"),
-    });
+    const contract = await Bet.deploy(
+      game.address,
+
+      {
+        value: ethers.utils.parseEther("1"),
+      }
+    );
     await contract.deployed();
     const betAmount = await contract.betAmount();
     // bet amount should equal the value sent, 0 in this case.
@@ -44,7 +57,7 @@ describe("Bet", function () {
     const [owner, addr1] = await ethers.getSigners();
 
     const Bet = await ethers.getContractFactory("Bet");
-    const contract = await Bet.deploy({
+    const contract = await Bet.deploy(game.address, {
       value: ethers.utils.parseEther("1"),
     });
     await contract.deployed();
@@ -69,7 +82,9 @@ describe("Bet", function () {
     // get balance of addr1
 
     const Bet = await ethers.getContractFactory("Bet");
-    const contract = await Bet.deploy({ value: ethers.utils.parseEther("1") });
+    const contract = await Bet.deploy(game.address, {
+      value: ethers.utils.parseEther("1"),
+    });
     await contract.deployed();
 
     await contract

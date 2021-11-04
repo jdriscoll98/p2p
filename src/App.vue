@@ -5,129 +5,116 @@
   <h1>Jack's First P2P Blockchain Betting Application</h1>
   <img width="100" src="./assets/coin.svg" />
   <h3>Your address: {{ address }}</h3>
-  <h4>Input Game Address</h4>
+  <h4>Input Platform Address</h4>
   <p>
-    <input v-model="gameAddress" />
-    <button @click="joinGame">Join Game</button>
+    <input v-model="platformAddress" />
+    <button @click="joinPlatform">Join Platform</button>
   </p>
-  <p v-if="gameError" style="color: red">{{ gameError }}</p>
-  <strong>OR</strong>
-  <h4>Create a new game</h4>
-  <button @click="createGame">Create Game</button>
+  <p v-if="platformError" style="color: red">{{ platformError }}</p>
 
-  <p v-if="betError" style="color: red">{{ betError }}</p>
-  <template v-if="connectedToGame">
+  <template v-if="connectedToPlatform">
     <hr style="width: 100%; margin-block: 1rem" />
-    <h1>Connected to game: {{ currentGame }}</h1>
-    <p>Make a bet</p>
+    <h1>Connected to platform: {{ currentPlatform }}</h1>
     <p>
-      <input type="text" v-model="bet" />
-      <label>ETH</label>
-      <button @click="makeBet">Bet</button>
+      <button @click="createGame">Create Game</button>
     </p>
-    <h3>Current Bets</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Address</th>
-          <th>Side</th>
-          <th>Wage</th>
-          <th>Result</th>
-          <th>Accept?</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr :key="bet" v-for="bet in bets">
-          <td>{{ bet }}</td>
-        </tr>
-      </tbody>
-    </table>
+
+    <h3>Current Games</h3>
+    <template :key="game" v-for="game in games"> {{ game }} <br /> </template>
   </template>
 </template>
 
 <script>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { ethers } from "ethers";
-import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
+// import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
 import Game from "../artifacts/contracts/Game.sol/Game.json";
+import Platform from "../artifacts/contracts/Platform.sol/Platform.json";
 
 export default {
   name: "App",
   setup() {
     const connectedToEthereum = ref(false);
 
-    const gameAddress = ref("");
-    const connectedToGame = ref(false);
-    const gameError = ref("");
-    const currentGame = ref("");
+    const platformAddress = ref("0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"); // Default Platform
+    const currentPlatform = ref("");
+    const platformError = ref("");
+    const connectedToPlatform = ref(false);
 
+    const games = ref([]);
+
+    watch(currentPlatform, async () => {
+      if (!currentPlatform.value) {
+        games.value = [];
+      }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const contract = new ethers.Contract(
+        currentPlatform.value,
+        Platform.abi,
+        provider
+      );
+
+      games.value = await contract.getGames();
+    });
+
+    const createGame = async () => {
+      if (!currentPlatform.value) {
+        return;
+      }
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      // create a game factory
+      const gameFactory = new ethers.ContractFactory(
+        Game.abi,
+        Game.bytecode,
+        signer
+      );
+      await gameFactory.deploy(currentPlatform.value);
+
+      // connect to the platform
+      const contract = new ethers.Contract(
+        currentPlatform.value,
+        Platform.abi,
+        signer
+      );
+      // get the games from the platform
+      games.value = await contract.getGames();
+    };
     const bet = ref(0);
     const betError = ref("");
     const bets = ref([]);
 
     const address = ref("");
 
-    const makeBet = async () => {
+    const joinPlatform = async () => {
       if (!connectedToEthereum.value) {
         return;
       }
-      if (bet.value <= 0) {
-        betError.value = "You cannot bet 0 ETH";
-        return;
-      }
-      betError.value = "";
-
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const BetFactory = new ethers.ContractFactory(
-        Bet.abi,
-        Bet.bytecode,
-        signer
-      );
-      const betContract = await BetFactory.deploy({
-        value: ethers.utils.parseEther(bet.value),
-      });
-      await betContract.deployed();
-
-      const GameContract = new ethers.Contract(
-        currentGame.value,
-        Game.abi,
-        signer
-      );
-      await GameContract.addBet(betContract.address);
-      // get bets from the contract
-      bets.value = await GameContract.getBets();
-      console.log(bets.value);
-      bet.value = 0;
-    };
-
-    const joinGame = async () => {
-      if (!connectedToEthereum.value) {
-        return;
-      }
-      if (!gameAddress.value) {
+      if (!platformAddress.value) {
         return;
       }
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       // get contract at gameAddress
       try {
-        const GameContract = new ethers.Contract(
-          gameAddress.value,
-          Game.abi,
+        const PlatformContract = new ethers.Contract(
+          platformAddress.value,
+          Platform.abi,
           signer
         );
-        // get bets from the contract
-        const gameBets = await GameContract.getBets();
-        bets.value = gameBets;
-        connectedToGame.value = true;
-        currentGame.value = GameContract.address;
-        gameError.value = "";
-        gameAddress.value = "";
+        const resolvedAddress = await PlatformContract.resolvedAddress;
+        if (resolvedAddress.includes("Error")) {
+          throw new Error(resolvedAddress);
+        }
+        currentPlatform.value = resolvedAddress;
+        connectedToPlatform.value = true;
+        platformError.value = "";
+        platformAddress.value = "";
       } catch {
-        gameError.value = "Could not connect to game";
-        if (!connectedToGame.value) {
-          connectedToGame.value = false;
+        platformError.value = "Could not connect to platform";
+        if (!platformError.value) {
+          platformError.value = false;
         }
       }
     };
@@ -140,26 +127,31 @@ export default {
       try {
         await window.ethereum.request({ method: "eth_requestAccounts" });
         connectedToEthereum.value = true;
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        address.value = await signer.getAddress();
+        joinPlatform();
       } catch (error) {
         connectedToEthereum.value = false;
       }
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      address.value = await signer.getAddress();
     });
 
     return {
+      connectedToEthereum,
+
       bet,
       betError,
       bets,
-      makeBet,
-      connectedToEthereum,
-      gameAddress,
-      connectedToGame,
-      joinGame,
-      gameError,
-      currentGame,
       address,
+
+      platformAddress,
+      currentPlatform,
+      connectedToPlatform,
+      platformError,
+      joinPlatform,
+
+      games,
+      createGame,
     };
   },
 };
