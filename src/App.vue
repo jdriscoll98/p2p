@@ -54,7 +54,7 @@ export default {
   setup() {
     const connectedToEthereum = ref(false);
 
-    const platformAddress = ref("0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"); // Default Platform
+    const platformAddress = ref("0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE"); // Default Platform
     const currentPlatform = ref("");
     const platformError = ref("");
     const connectedToPlatform = ref(false);
@@ -103,9 +103,14 @@ export default {
         Bet.bytecode,
         signer
       );
-      await betFactory.deploy(gameAddress, {
+      const bet = await betFactory.deploy(gameAddress, {
         value: ethers.utils.parseEther("1"),
       });
+      await bet.deployed();
+
+      const game = new ethers.Contract(gameAddress, Game.abi, provider);
+      const bets = await game.getBets();
+      games.value.find((game) => game.address === gameAddress).bets = bets;
     };
 
     const createGame = async () => {
@@ -120,7 +125,8 @@ export default {
         Game.bytecode,
         signer
       );
-      await gameFactory.deploy(currentPlatform.value);
+      const game = await gameFactory.deploy(currentPlatform.value);
+      await game.deployed();
 
       // connect to the platform
       const contract = new ethers.Contract(
