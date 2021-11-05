@@ -20,23 +20,33 @@
     </p>
 
     <h3>Current Games</h3>
-    <table :key="game.address" v-for="game in games">
+    <table style="margin: 1rem" :key="game.address" v-for="game in games">
       <thead>
         <tr>
-          <th colspan="100%">Address: {{ game.address }}</th>
-        </tr>
-        <tr>
+          <th>Address: {{ game.address }}</th>
+          <th>Owner: {{ game.owner }}</th>
           <th>
-            Current Bets <button @click="newBet(game.address)">New Bet</button>
+            <button @click="game.showBets = !game.showBets">
+              {{ game.showBets ? "Hide" : "Show" }} bets
+            </button>
           </th>
-          <th>Wager</th>
         </tr>
       </thead>
-      <tbody>
-        <tr :key="bet" v-for="bet in game.bets">
-          <td>{{ bet }}</td>
-          <td>1 ETH</td>
-        </tr>
+      <tbody v-if="game.showBets">
+        <template v-if="game.bets.length > 0">
+          <tr :key="bet.address" v-for="bet in game.bets">
+            <td>{{ bet.amount }}</td>
+            <td>{{ bet.player }}</td>
+            <td>{{ bet.amount }}</td>
+            <td>{{ bet.accepted }}</td>
+          </tr>
+        </template>
+        <template v-else>
+          <tr>
+            <td>No bets yet</td>
+            <td><button>Create new bet</button></td>
+          </tr>
+        </template>
       </tbody>
     </table>
   </template>
@@ -53,8 +63,9 @@ export default {
   name: "App",
   setup() {
     const connectedToEthereum = ref(false);
+    const address = ref("");
 
-    const platformAddress = ref("0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE"); // Default Platform
+    const platformAddress = ref("0x5FbDB2315678afecb367f032d93F642f64180aa3"); // Default Platform
     const currentPlatform = ref("");
     const platformError = ref("");
     const connectedToPlatform = ref(false);
@@ -65,24 +76,7 @@ export default {
       if (!currentPlatform.value) {
         games.value = [];
       }
-
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const contract = new ethers.Contract(
-        currentPlatform.value,
-        Platform.abi,
-        provider
-      );
-
-      const gameAddresses = await contract.getGames();
-      const promises = await gameAddresses.map(async (address) => {
-        const game = new ethers.Contract(address, Game.abi, provider);
-        const bets = await game.getBets();
-        return {
-          address: address,
-          bets: bets,
-        };
-      });
-      games.value = await Promise.all(promises);
+      games.value = await getAllGames();
     });
 
     const getBets = async (gameAddress) => {
@@ -128,27 +122,8 @@ export default {
       const game = await gameFactory.deploy(currentPlatform.value);
       await game.deployed();
 
-      // connect to the platform
-      const contract = new ethers.Contract(
-        currentPlatform.value,
-        Platform.abi,
-        provider
-      );
-      // get the games from the platform
-
-      const gameAddresses = await contract.getGames();
-      const promises = await gameAddresses.map(async (address) => {
-        const game = new ethers.Contract(address, Game.abi, provider);
-        const bets = await game.getBets();
-        return {
-          address: address,
-          bets: bets,
-        };
-      });
-      games.value = await Promise.all(promises);
+      games.value = await getAllGames();
     };
-
-    const address = ref("");
 
     const joinPlatform = async () => {
       if (!connectedToEthereum.value) {
@@ -199,6 +174,22 @@ export default {
       }
     });
 
+    async function getAllGames() {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const contract = new ethers.Contract(
+        currentPlatform.value,
+        Platform.abi,
+        provider
+      );
+
+      const gameAddresses = await contract.getGames();
+      const promises = await gameAddresses.map(async (gameAddress) => {
+        const game = new ethers.Contract(gameAddress, Game.abi, provider);
+        const [address, bets, owner] = await game.getGame();
+        return { address, bets, owner };
+      });
+      return await Promise.all(promises);
+    }
     return {
       connectedToEthereum,
       address,

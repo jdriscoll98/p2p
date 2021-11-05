@@ -24,4 +24,19 @@ describe("Game", async () => {
     const bets = await game.getBets();
     expect(bets[0]).to.equal(bet.address);
   });
+
+  it("should return the correct owner", async () => {
+    const gameOwner = await game.getOwner();
+    const [owner] = await ethers.getSigners();
+    expect(gameOwner).to.equal(owner.address);
+  });
+
+  it("should return the full game data", async () => {
+    const [gameAddress, bets, owner] = await game.getGame();
+    expect(gameAddress).to.equal(game.address);
+    const gameBets = await game.getBets();
+    expect(bets[0]).to.equal(gameBets[0]);
+    const ownerAddress = await game.getOwner();
+    expect(owner).to.equal(ownerAddress);
+  });
 });
