@@ -6,6 +6,7 @@ import "./Platform.sol";
 
 contract Game {
     Platform public platform;
+    // todo change to "bet" struct
     address[] bets;
     address owner;
 

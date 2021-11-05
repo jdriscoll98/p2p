@@ -35,6 +35,9 @@
       <tbody v-if="game.showBets">
         <template v-if="game.bets.length > 0">
           <tr :key="bet.address" v-for="bet in game.bets">
+            {{
+              bet
+            }}
             <td>{{ bet.amount }}</td>
             <td>{{ bet.player }}</td>
             <td>{{ bet.amount }}</td>
@@ -44,7 +47,9 @@
         <template v-else>
           <tr>
             <td>No bets yet</td>
-            <td><button>Create new bet</button></td>
+            <td>
+              <button @click="newBet(game.address)">Create new bet</button>
+            </td>
           </tr>
         </template>
       </tbody>
