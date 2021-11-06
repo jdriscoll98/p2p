@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
-import "./Platform.sol";
+import "./demo-platform.sol";
 
 contract Game {
     Platform public platform;
