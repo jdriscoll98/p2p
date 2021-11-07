@@ -4,6 +4,7 @@ import Game from "../views/Game.vue";
 import Bet from "../views/Bet.vue";
 import BetStatus from "../views/BetStatus.vue";
 import BetHistory from "../views/BetHistory.vue";
+import BetCreate from "../views/BetCreate.vue";
 
 const routes = [
   {
@@ -15,6 +16,11 @@ const routes = [
     path: "/games/:title/",
     name: "Game",
     component: Game,
+  },
+  {
+    path: "/games/:title/newbet",
+    name: "BetCreate",
+    component: BetCreate,
   },
   {
     path: "/games/:title/bets/:id/",

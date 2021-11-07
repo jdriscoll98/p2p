@@ -65,11 +65,28 @@
         </tr>
       </tbody>
     </table>
+    <div class="footer">
+      <button class="go-back-btn" @click="goHome">Go Home</button>
+    </div>
   </div>
 </template>
 
 <script>
-export default {};
+import { useRouter } from "vue-router";
+
+export default {
+  name: "BetHistory",
+  setup() {
+    const router = useRouter();
+
+    const goHome = () => {
+      router.push("/");
+    };
+    return {
+      goHome,
+    };
+  },
+};
 </script>
 
 <style>

@@ -22,7 +22,7 @@ export default {
     const connectedToEthereum = ref(false);
     const address = ref("");
 
-    const platformAddress = ref("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"); // Default Platform
+    const platformAddress = ref("0x5FbDB2315678afecb367f032d93F642f64180aa3"); // Default Platform
     const currentPlatform = ref("");
     const platformError = ref("");
     const connectedToPlatform = ref(false);
@@ -185,6 +185,7 @@ body {
   flex-direction: column;
   align-items: center;
   height: 100%;
+  overflow-y: hidden;
 }
 
 table,

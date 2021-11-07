@@ -1,6 +1,6 @@
 <template>
   <div class="main-nav">
-    <h3 class="title">Odds</h3>
+    <h3 class="title"><router-link to="/">Odds</router-link></h3>
     <i class="pi pi-user"></i>
   </div>
 </template>
@@ -21,6 +21,8 @@ export default {
   padding: 1rem;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
 }
 
 .title {
@@ -28,5 +30,10 @@ export default {
 }
 .account-icon {
   margin-inline-end: 1rem;
+}
+
+a {
+  text-decoration: none;
+  color: black;
 }
 </style>

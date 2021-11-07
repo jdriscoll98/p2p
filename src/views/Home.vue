@@ -24,7 +24,7 @@ export default {
     const spinCoin = () => {
       const coin = document.getElementById("coin");
       if (!coin) return;
-      degrees.value += 1800;
+      degrees.value = degrees.value >= 1800 ? 0 : degrees.value + 1800;
       coin.style.webkitTransform = "rotateY(" + degrees.value + "deg)";
       coin.style.MozTransform = "rotateY(" + degrees.value + "deg)";
       coin.style.msTransform = "rotateY(" + degrees.value + "deg)";
@@ -58,7 +58,7 @@ body {
   margin: 50px auto;
   position: relative;
   width: 100px;
-  -webkit-transition: 2s linear;
+  -webkit-transition: 4s linear;
   -webkit-transform-style: preserve-3d;
 }
 
@@ -66,6 +66,6 @@ body {
   width: 100%;
   padding-inline: 1rem;
   display: flex;
-  justify-content: start;
+  justify-content: flex-start;
 }
 </style>

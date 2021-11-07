@@ -7917,6 +7917,11 @@ javascript-stringify@^2.0.1:
   resolved "https://registry.yarnpkg.com/javascript-stringify/-/javascript-stringify-2.1.0.tgz#27c76539be14d8bd128219a2d731b09337904e79"
   integrity sha512-JVAfqNPTvNq3sB/VHQJAFxN/sPgKnsKrCwyRt15zwNCdrMMJDdcEOdubuy+DuJYYdm0ox1J4uzEuYKkN+9yhVg==
 
+js-confetti@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/js-confetti/-/js-confetti-0.9.0.tgz#e00b5799d39292d0b8a537b696717aec279458d2"
+  integrity sha512-hxcUYGzcuiDlEWgnfPh7aFenXmVgslQF4ddzbPTj+5U1SNCkoUgPlWjUCS5vu2/Pdx3ZKiohk6OiPBPyw5ilRg==
+
 js-message@1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/js-message/-/js-message-1.0.7.tgz#fbddd053c7a47021871bb8b2c95397cc17c20e47"
