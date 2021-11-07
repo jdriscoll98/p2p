@@ -1,9 +1,9 @@
 <template>
   <div id="gamecard" class="card-container">
     <div class="card">
-      <div class="card-heading">Coin Flip</div>
+      <div class="card-heading">{{ title }}</div>
       <div class="card-image">
-        <img src="../assets/coinflip3.png" alt="" />
+        <img src="../assets/coinflip3.png" role="presentation" />
       </div>
       <div class="card-footer">
         <button @click="openGame()" class="open-game-btn">Play game</button>
@@ -16,6 +16,16 @@
 import { useRouter } from "vue-router";
 export default {
   name: "Gamecard",
+  props: {
+    title: {
+      type: String,
+      default: "Coin Flip",
+    },
+    image: {
+      type: String,
+      default: "../assets/coinflip3.png",
+    },
+  },
   setup() {
     const route = useRouter();
 
@@ -61,6 +71,7 @@ export default {
   width: 100%;
   height: 100%;
   margin: 1rem 0rem;
+  padding: 0.5rem 0.5rem;
   border-radius: 0.5rem;
   background-color: #00a8ff;
   color: white;

@@ -6,37 +6,26 @@
   <div class="featured">
     <h1>Featured Games</h1>
   </div>
-
-  <GameCard />
+  <GameCard :key="game.address" v-for="game in games" :title="'Coin Flip'" />
 </template>
 
 <script>
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 // @ is an alias to /src
 import GameCard from "@/components/GameCard.vue";
+import useSpinningCoin from "@/composables/useSpinningCoin";
+
 export default {
   name: "Home",
   components: {
     GameCard,
   },
   setup() {
-    const degrees = ref(0);
-    const spinCoin = () => {
-      const coin = document.getElementById("coin");
-      if (!coin) return;
-      degrees.value = degrees.value >= 1800 ? 0 : degrees.value + 1800;
-      coin.style.webkitTransform = "rotateY(" + degrees.value + "deg)";
-      coin.style.MozTransform = "rotateY(" + degrees.value + "deg)";
-      coin.style.msTransform = "rotateY(" + degrees.value + "deg)";
-      coin.style.OTransform = "rotateY(" + degrees.value + "deg)";
-      coin.style.transform = "rotateY(" + degrees.value + "deg)";
-    };
+    const games = ref([]);
 
-    onMounted(() => {
-      setInterval(spinCoin, 3000);
-    });
-
+    const { spinCoin } = useSpinningCoin();
     return {
+      games,
       spinCoin,
     };
   },
