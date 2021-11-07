@@ -1,61 +1,8 @@
 <template>
-  <h1 style="color: red" v-if="!connectedToEthereum">
-    You need MetaMask to use this application
-  </h1>
-  <h1>Jack's First P2P Blockchain Betting Application</h1>
-  <img width="100" src="./assets/coin.svg" />
-  <h3>Your address: {{ address }}</h3>
-  <h4>Input Platform Address</h4>
-  <p>
-    <input v-model="platformAddress" />
-    <button @click="joinPlatform">Join Platform</button>
-  </p>
-  <p v-if="platformError" style="color: red">{{ platformError }}</p>
-
-  <template v-if="connectedToPlatform">
-    <hr style="width: 100%; margin-block: 1rem" />
-    <h1>Connected to platform: {{ currentPlatform }}</h1>
-    <p>
-      <button @click="createGame">Create Game</button>
-    </p>
-
-    <h3>Current Games</h3>
-    <table style="margin: 1rem" :key="game.address" v-for="game in games">
-      <thead>
-        <tr>
-          <th>Address: {{ game.address }}</th>
-          <th>Owner: {{ game.owner }}</th>
-          <th>
-            <button @click="game.showBets = !game.showBets">
-              {{ game.showBets ? "Hide" : "Show" }} bets
-            </button>
-          </th>
-        </tr>
-      </thead>
-      <tbody v-if="game.showBets">
-        <template v-if="game.bets.length > 0">
-          <tr :key="bet.address" v-for="bet in game.bets">
-            {{
-              bet
-            }}
-            <td>{{ bet.amount }}</td>
-            <td>{{ bet.player }}</td>
-            <td>{{ bet.amount }}</td>
-            <td>{{ bet.accepted }}</td>
-          </tr>
-        </template>
-        <template v-else>
-          <tr>
-            <td>No bets yet</td>
-            <td>
-              <button @click="newBet(game.address)">Create new bet</button>
-            </td>
-          </tr>
-        </template>
-      </tbody>
-    </table>
-  </template>
+  <Navbar />
+  <router-view> </router-view>
 </template>
+
 
 <script>
 import { onMounted, ref, watch } from "vue";
@@ -64,13 +11,18 @@ import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
 import Game from "../artifacts/contracts/Game.sol/Game.json";
 import Platform from "../artifacts/contracts/Platform.sol/Platform.json";
 
+import Navbar from "./components/Navbar.vue";
+
 export default {
   name: "App",
+  components: {
+    Navbar,
+  },
   setup() {
     const connectedToEthereum = ref(false);
     const address = ref("");
 
-    const platformAddress = ref("0x5FbDB2315678afecb367f032d93F642f64180aa3"); // Default Platform
+    const platformAddress = ref("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"); // Default Platform
     const currentPlatform = ref("");
     const platformError = ref("");
     const connectedToPlatform = ref(false);
@@ -218,6 +170,7 @@ export default {
 <style>
 * {
   margin: 0;
+  box-sizing: border-box;
   padding: 0;
 }
 
