@@ -23,7 +23,11 @@ export default function useGame(gameAddress) {
   const addBetToGame = async (amount, choice) => {
     const signer = await getSigner();
     const gameContract = new ethers.Contract(gameAddress, Game.abi, signer);
+
     const enumChoice = choice === "Heads" ? 0 : 1;
+    gameContract.on("BetCreated", (event) => {
+      console.log(event);
+    });
     await gameContract.addBet(enumChoice, {
       value: ethers.utils.parseEther(amount.toString()),
     });

@@ -6,6 +6,7 @@ import "./Platform.sol";
 import "./Bet.sol";
 
 contract Game {
+    event BetCreated(address bet);
     string public name;
     Bet[] bets;
     address owner;
@@ -22,6 +23,7 @@ contract Game {
     function addBet(uint256 choice) public payable {
         Bet bet = new Bet(msg.value, choice, msg.sender);
         bets.push(bet);
+        emit BetCreated(address(bet));
     }
 
     function getBets() public view returns (Bet[] memory) {

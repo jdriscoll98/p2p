@@ -76,7 +76,6 @@ export default {
 
     const createBet = async () => {
       await addBetToGame(betAmount.value, betChoice.value);
-      router.push("/games/coinflip/bets/bet1/status");
     };
 
     const goBack = () => {
