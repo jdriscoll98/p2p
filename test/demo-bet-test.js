@@ -1,5 +1,3 @@
-/* globals describe, before, it */ 
-
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
