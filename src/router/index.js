@@ -18,17 +18,17 @@ const routes = [
     component: Game,
   },
   {
-    path: "/games/:title/newbet",
+    path: "/games/:address/newbet",
     name: "BetCreate",
     component: BetCreate,
   },
   {
-    path: "/games/:title/bets/:id/",
+    path: "/games/:address/bets/:id/",
     name: "Bet",
     component: Bet,
   },
   {
-    path: "/games/:title/bets/:id/status",
+    path: "/games/:address/bets/:id/status",
     name: "BetStatus",
     component: BetStatus,
   },

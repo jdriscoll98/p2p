@@ -1,6 +1,6 @@
 <template>
   <div class="create-page">
-    <h1 class="game-title">{{ title }} - New Bet</h1>
+    <h1 class="game-title">{{ game?.title }} - New Bet</h1>
     <h3>Bet Amount</h3>
     <div class="input-control">
       <input
@@ -42,7 +42,7 @@
 <script>
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
+import useGame from "../composables/useGame";
 export default {
   name: "BetCreate",
   setup() {
@@ -52,7 +52,7 @@ export default {
     const betAmount = ref(0);
     const betChoice = ref("Heads");
 
-    const title = ref(route.params.title);
+    const { game } = useGame(route.params.address);
 
     const choices = ["Heads", "Tails", "I'm Feeling Lucky"];
     const choose = (choice) => {
@@ -85,9 +85,9 @@ export default {
       choose,
       betAmount,
       betChoice,
-      title,
       goBack,
       createBet,
+      game,
     };
   },
 };
