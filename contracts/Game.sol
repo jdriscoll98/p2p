@@ -3,10 +3,11 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 import "./Platform.sol";
+import "./Bet.sol";
 
 contract Game {
     string public name;
-    address[] bets;
+    Bet[] bets;
     address owner;
 
     constructor(string memory _name) {
@@ -18,11 +19,12 @@ contract Game {
         return owner;
     }
 
-    function addBet(address bet) external {
+    function addBet(uint256 choice) public payable {
+        Bet bet = new Bet(msg.value, choice, msg.sender);
         bets.push(bet);
     }
 
-    function getBets() public view returns (address[] memory) {
+    function getBets() public view returns (Bet[] memory) {
         return bets;
     }
 
@@ -31,7 +33,7 @@ contract Game {
         view
         returns (
             address,
-            address[] memory,
+            Bet[] memory,
             string memory
         )
     {

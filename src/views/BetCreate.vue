@@ -52,7 +52,8 @@ export default {
     const betAmount = ref(0);
     const betChoice = ref("Heads");
 
-    const { game } = useGame(route.params.address);
+    // eslint-disable-next-line no-unused-vars
+    const { game, addBetToGame } = useGame(route.params.address);
 
     const choices = ["Heads", "Tails", "I'm Feeling Lucky"];
     const choose = (choice) => {
@@ -73,7 +74,8 @@ export default {
       choiceBtn?.classList.add("selected");
     };
 
-    const createBet = () => {
+    const createBet = async () => {
+      await addBetToGame(betAmount.value, betChoice.value);
       router.push("/games/coinflip/bets/bet1/status");
     };
 

@@ -3,7 +3,8 @@ import { ethers } from "ethers";
 import { onMounted, ref } from "vue";
 import Game from "../../artifacts/contracts/Game.sol/Game.json";
 export default function useGame(gameAddress) {
-  const { connectedToEthereum, connectToEthereum, getProvider } = useEthereum();
+  const { connectedToEthereum, connectToEthereum, getProvider, getSigner } =
+    useEthereum();
 
   const game = ref(null);
 
@@ -19,5 +20,14 @@ export default function useGame(gameAddress) {
     game.value = { address, bets, title };
   });
 
-  return { game };
+  const addBetToGame = async (amount, choice) => {
+    const signer = await getSigner();
+    const gameContract = new ethers.Contract(gameAddress, Game.abi, signer);
+    const enumChoice = choice === "Heads" ? 0 : 1;
+    await gameContract.addBet(enumChoice, {
+      value: ethers.utils.parseEther(amount.toString()),
+    });
+  };
+
+  return { game, addBetToGame };
 }
