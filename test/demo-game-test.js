@@ -32,11 +32,11 @@ describe("Game", async () => {
   });
 
   it("should return the full game data", async () => {
-    const [gameAddress, bets, owner] = await game.getGame();
+    const [gameAddress, bets, name] = await game.getGame();
     expect(gameAddress).to.equal(game.address);
     const gameBets = await game.getBets();
     expect(bets[0]).to.equal(gameBets[0]);
-    const ownerAddress = await game.getOwner();
-    expect(owner).to.equal(ownerAddress);
+    const gameName = await game.name();
+    expect(name).to.equal(gameName);
   });
 });

@@ -1,216 +1,16 @@
 <template>
-  <h1 style="color: red" v-if="!connectedToEthereum">
-    You need MetaMask to use this application
-  </h1>
-  <h1>Jack's First P2P Blockchain Betting Application</h1>
-  <img width="100" src="./assets/coin.svg" />
-  <h3>Your address: {{ address }}</h3>
-  <h4>Input Platform Address</h4>
-  <p>
-    <input v-model="platformAddress" />
-    <button @click="joinPlatform">Join Platform</button>
-  </p>
-  <p v-if="platformError" style="color: red">{{ platformError }}</p>
-
-  <template v-if="connectedToPlatform">
-    <hr style="width: 100%; margin-block: 1rem" />
-    <h1>Connected to platform: {{ currentPlatform }}</h1>
-    <p>
-      <button @click="createGame">Create Game</button>
-    </p>
-
-    <h3>Current Games</h3>
-    <table style="margin: 1rem" :key="game.address" v-for="game in games">
-      <thead>
-        <tr>
-          <th>Address: {{ game.address }}</th>
-          <th>Owner: {{ game.owner }}</th>
-          <th>
-            <button @click="game.showBets = !game.showBets">
-              {{ game.showBets ? "Hide" : "Show" }} bets
-            </button>
-          </th>
-        </tr>
-      </thead>
-      <tbody v-if="game.showBets">
-        <template v-if="game.bets.length > 0">
-          <tr :key="bet.address" v-for="bet in game.bets">
-            {{
-              bet
-            }}
-            <td>{{ bet.amount }}</td>
-            <td>{{ bet.player }}</td>
-            <td>{{ bet.amount }}</td>
-            <td>{{ bet.accepted }}</td>
-          </tr>
-        </template>
-        <template v-else>
-          <tr>
-            <td>No bets yet</td>
-            <td>
-              <button @click="newBet(game.address)">Create new bet</button>
-            </td>
-          </tr>
-        </template>
-      </tbody>
-    </table>
-  </template>
+  <Navbar />
+  <router-view> </router-view>
 </template>
 
+
 <script>
-import { onMounted, ref, watch } from "vue";
-import { ethers } from "ethers";
-import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
-import Game from "../artifacts/contracts/Game.sol/Game.json";
-import Platform from "../artifacts/contracts/Platform.sol/Platform.json";
+import Navbar from "./components/Navbar.vue";
 
 export default {
   name: "App",
-  setup() {
-    const connectedToEthereum = ref(false);
-    const address = ref("");
-
-    const platformAddress = ref("0x5FbDB2315678afecb367f032d93F642f64180aa3"); // Default Platform
-    const currentPlatform = ref("");
-    const platformError = ref("");
-    const connectedToPlatform = ref(false);
-
-    const games = ref([]);
-
-    watch(currentPlatform, async () => {
-      if (!currentPlatform.value) {
-        games.value = [];
-      }
-      games.value = await getAllGames();
-    });
-
-    const getBets = async (gameAddress) => {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const contract = new ethers.Contract(gameAddress, Game.abi, provider);
-
-      const bets = await contract.getBets();
-      console.log(bets);
-      return bets;
-    };
-
-    const newBet = async (gameAddress) => {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-
-      const betFactory = new ethers.ContractFactory(
-        Bet.abi,
-        Bet.bytecode,
-        signer
-      );
-      const bet = await betFactory.deploy(gameAddress, {
-        value: ethers.utils.parseEther("1"),
-      });
-      await bet.deployed();
-
-      const game = new ethers.Contract(gameAddress, Game.abi, provider);
-      const bets = await game.getBets();
-      games.value.find((game) => game.address === gameAddress).bets = bets;
-    };
-
-    const createGame = async () => {
-      if (!currentPlatform.value) {
-        return;
-      }
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      // create a game factory
-      const gameFactory = new ethers.ContractFactory(
-        Game.abi,
-        Game.bytecode,
-        signer
-      );
-      const game = await gameFactory.deploy(currentPlatform.value);
-      await game.deployed();
-
-      games.value = await getAllGames();
-    };
-
-    const joinPlatform = async () => {
-      if (!connectedToEthereum.value) {
-        return;
-      }
-      if (!platformAddress.value) {
-        return;
-      }
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      // get contract at gameAddress
-      try {
-        const PlatformContract = new ethers.Contract(
-          platformAddress.value,
-          Platform.abi,
-          signer
-        );
-        const resolvedAddress = await PlatformContract.resolvedAddress;
-        if (resolvedAddress.includes("Error")) {
-          throw new Error(resolvedAddress);
-        }
-        currentPlatform.value = resolvedAddress;
-        connectedToPlatform.value = true;
-        platformError.value = "";
-        platformAddress.value = "";
-      } catch {
-        platformError.value = "Could not connect to platform";
-        if (!platformError.value) {
-          platformError.value = false;
-        }
-      }
-    };
-
-    onMounted(async () => {
-      if (!window.ethereum) {
-        connectedToEthereum.value = false;
-        return;
-      }
-      try {
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        connectedToEthereum.value = true;
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        address.value = await signer.getAddress();
-        joinPlatform();
-      } catch (error) {
-        connectedToEthereum.value = false;
-      }
-    });
-
-    async function getAllGames() {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const contract = new ethers.Contract(
-        currentPlatform.value,
-        Platform.abi,
-        provider
-      );
-
-      const gameAddresses = await contract.getGames();
-      const promises = await gameAddresses.map(async (gameAddress) => {
-        const game = new ethers.Contract(gameAddress, Game.abi, provider);
-        const [address, bets, owner] = await game.getGame();
-        return { address, bets, owner };
-      });
-      return await Promise.all(promises);
-    }
-    return {
-      connectedToEthereum,
-      address,
-
-      platformAddress,
-      currentPlatform,
-      connectedToPlatform,
-      platformError,
-      joinPlatform,
-
-      games,
-      createGame,
-
-      getBets,
-      newBet,
-    };
+  components: {
+    Navbar,
   },
 };
 </script>
@@ -218,6 +18,7 @@ export default {
 <style>
 * {
   margin: 0;
+  box-sizing: border-box;
   padding: 0;
 }
 
@@ -232,6 +33,7 @@ body {
   flex-direction: column;
   align-items: center;
   height: 100%;
+  overflow-y: hidden;
 }
 
 table,

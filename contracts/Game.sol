@@ -20,11 +20,29 @@ contract Game {
         return bet;
     }
 
+    function getBets() public view returns (address[] memory) {
+        return bets;
+    }
+
+    function getGame()
+        public
+        view
+        returns (
+            address,
+            address[] memory,
+            string memory
+        )
+    {
+        return (address(this), bets, name);
+    }
+
     function resolveBet(Bet bet) public {
         uint256 randomNumber = uint256(
             keccak256(abi.encodePacked(block.timestamp))
         ) % 2;
-        Bet.Choice correctChoice = randomNumber < uint256(1) ? Bet.Choice.First : Bet.Choice.Second;
+        Bet.Choice correctChoice = randomNumber < uint256(1)
+            ? Bet.Choice.First
+            : Bet.Choice.Second;
         bet.resolve(correctChoice);
     }
 }
