@@ -79,5 +79,6 @@ export default {
 .available {
   height: 100%;
   overflow: scroll;
+  padding-bottom: 8rem;
 }
 </style>
