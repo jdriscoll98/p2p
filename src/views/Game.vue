@@ -8,7 +8,7 @@
     <h2>Available Bets</h2>
 
     <div class="available">
-      <BetCard v-for="bet in game?.bets" :key="bet" @click="viewBet" />
+      <BetCard v-for="bet in game?.bets" :key="bet?.betAddress" @click="viewBet(bet?.betAddress)" :address="bet?.betAddress" :amount="bet.amountInEth" :choice="bet.gameChoice" />
     </div>
   </div>
 </template>
@@ -26,8 +26,8 @@ export default {
     const route = useRoute();
     const router = useRouter();
 
-    const viewBet = () => {
-      router.push(`/games/${route.params.address}/bets/bet1/`);
+    const viewBet = (bet) => {
+      router.push(`/games/${route.params.address}/bets/${bet}/`);
     };
 
     const newBet = () => {

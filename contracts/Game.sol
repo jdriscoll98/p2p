@@ -21,7 +21,7 @@ contract Game {
     }
 
     function addBet(uint256 choice) public payable {
-        Bet bet = new Bet(msg.value, choice, msg.sender);
+        Bet bet = (new Bet){value: msg.value}(choice, msg.sender);
         bets.push(bet);
         emit BetCreated(address(bet));
     }
@@ -41,4 +41,21 @@ contract Game {
     {
         return (address(this), bets, name);
     }
+
+    // function resolve() public {
+    //     uint256 randomNumber = uint256(
+    //         keccak256(abi.encodePacked(block.timestamp))
+    //     ) % 2;
+    //     // if the random number is less than 0.5 then player1 wins
+    //     if (randomNumber < uint256(1)) {
+    //         // send the bet amount to player1
+    //         player1.transfer(betAmount);
+    //         emit Winner(player1);
+    //     } else {
+    //         // send the bet amount to player2
+    //         player2.transfer(betAmount);
+    //         console.log("Player 2 wins!");
+    //         emit Winner(player2);
+    //     }
+    // }
 }
