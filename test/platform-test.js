@@ -14,9 +14,11 @@ describe("Platform", async () => {
   });
 
   it("should be able to add a game to the platform", async () => {
-    const gameFactory = await ethers.getContractFactory("Game");
-    const game = await gameFactory.deploy(platform.address);
+    await platform.registerGame("Hello, world");
     const gameAddress = await platform.games(0);
-    expect(gameAddress).to.be.equal(game.address);
+    const gameFactory = await ethers.getContractFactory("Game");
+    const game = await gameFactory.attach(gameAddress);
+    const [address, bets, name] = await game.getGame();
+    expect(name).to.be.equal("Hello, world");
   });
 });

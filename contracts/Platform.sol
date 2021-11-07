@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
+import "./Game.sol";
+
 contract Platform {
-    address[] public games;
+    Game[] public games;
 
     // @notice Register a game
-    function registerGame(address game) public {
+    function registerGame(string memory name) public {
+        Game game = new Game(name);
         games.push(game);
     }
 
     // return all games
-    function getGames() public view returns (address[] memory) {
+    function getGames() public view returns (Game[] memory) {
         return games;
     }
 }

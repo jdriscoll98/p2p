@@ -5,14 +5,13 @@ import "hardhat/console.sol";
 import "./Platform.sol";
 
 contract Game {
-    Platform public platform;
+    string public name;
     address[] bets;
     address owner;
 
-    constructor(address platformAddress) {
+    constructor(string memory _name) {
+        name = _name;
         owner = msg.sender;
-        platform = Platform(platformAddress);
-        platform.registerGame(address(this));
     }
 
     function getOwner() public view returns (address) {
@@ -33,9 +32,9 @@ contract Game {
         returns (
             address,
             address[] memory,
-            address
+            string memory
         )
     {
-        return (address(this), bets, owner);
+        return (address(this), bets, name);
     }
 }

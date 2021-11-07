@@ -1,32 +1,29 @@
 <template>
   <div class="game-page">
-    <h1>{{ title }}</h1>
+    <h1>{{ game?.title }}</h1>
     <div class="action">
       <h3>New bet</h3>
-      <i @click="newBet()" class="pi pi-plus-circle"></i>
+      <i @click="newBet(address)" class="pi pi-plus-circle"></i>
     </div>
     <h2>Available Bets</h2>
 
     <div class="available">
-      <BetCard @click="viewBet" />
-      <BetCard @click="viewBet" />
-      <BetCard @click="viewBet" />
-      <BetCard @click="viewBet" />
-      <BetCard @click="viewBet" />
-      <BetCard @click="viewBet" />
-      <BetCard @click="viewBet" />
-      <BetCard @click="viewBet" />
-      <BetCard @click="viewBet" />
-      <BetCard @click="viewBet" />
-      <BetCard @click="viewBet" />
+      <BetCard v-for="bet in game.bets" :key="bet" @click="viewBet" />
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
+// eslint-disable-next-line no-unused-vars
+import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import BetCard from "@/components/BetCard.vue";
+
+import useEthereum from "@/composables/useEthereum";
+
+import Game from "../../artifacts/contracts/Game.sol/Game.json";
+
+import { ethers } from "ethers";
 
 export default {
   name: "Game",
@@ -34,20 +31,39 @@ export default {
   setup() {
     const route = useRoute();
     const router = useRouter();
-    const title = ref(route.params.title);
 
     const viewBet = () => {
-      router.push(`/games/${title.value}/bets/bet1/`);
+      router.push(`/games/${route.params.address}/bets/bet1/`);
     };
 
     const newBet = () => {
-      router.push(`/games/${title.value}/newbet/`);
+      router.push(`/games/${route.params.address}/newbet/`);
     };
+
+    const { connectedToEthereum, connectToEthereum, getProvider } =
+      useEthereum();
+
+    const game = ref(null);
+    onMounted(async () => {
+      if (!connectedToEthereum.value) {
+        await connectToEthereum();
+      }
+
+      const provider = getProvider();
+
+      const gameContract = new ethers.Contract(
+        route.params.address,
+        Game.abi,
+        provider
+      );
+      const [address, bets, title] = await gameContract.getGame();
+      game.value = { address, bets, title };
+    });
 
     return {
       viewBet,
       newBet,
-      title,
+      game,
     };
   },
 };

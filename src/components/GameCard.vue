@@ -21,16 +21,20 @@ export default {
       type: String,
       default: "Coin Flip",
     },
+    address: {
+      type: String,
+      required: true,
+    },
     image: {
       type: String,
       default: "../assets/coinflip3.png",
     },
   },
-  setup() {
+  setup(props) {
     const route = useRouter();
 
     const openGame = () => {
-      route.push("/games/coinflip/");
+      route.push(`/games/${props.address}/`);
     };
     return {
       openGame,

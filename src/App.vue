@@ -5,8 +5,6 @@
 
 
 <script>
-// import { ethers } from "ethers";
-
 import Navbar from "./components/Navbar.vue";
 
 export default {

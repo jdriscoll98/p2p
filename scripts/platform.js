@@ -9,6 +9,7 @@ async function main() {
   const contract = await Platform.deploy();
 
   await contract.deployed();
+  await contract.registerGame("Coin Flip");
 
   console.log("Contract deployed to:", contract.address);
 }
